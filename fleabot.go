@@ -23,23 +23,30 @@ func init() {
 func main() {
 	ds, err := discordgo.New(fmt.Sprintf("Bot %s", Token))
 	if err != nil {
-		fmt.Printf("ERROR: Could not create Discord session. %s", err)
+		fmt.Println("ERROR: Could not create Discord session.", err)
 		return
 	}
 
 	ds.Identify.Intents = discordgo.IntentsGuildMessages
+	ds.AddHandler(messageCreateEvent)
 
 	err = ds.Open()
 	if err != nil {
-		fmt.Printf("ERROR: Could not establish websocket connection. %s", err)
+		fmt.Println("ERROR: Could not establish websocket connection.", err)
 		return
 	}
 
-	fmt.Print("Hello, world!")
+	fmt.Println("Hello, world!")
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
 	// Block until term signal received, then gracefully shut down.
 	<-c
 	ds.Close()
+}
+
+// Event Handlers
+
+func messageCreateEvent(ds *discordgo.Session, m *discordgo.MessageCreate) {
+	fmt.Printf("New message from %s.\n", m.Author.Username)
 }
